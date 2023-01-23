@@ -1,27 +1,12 @@
-import telebot
+from aiogram import Bot, Dispatcher, executor, types
+import asyncio
 
-TOKEN = "Ваш Telegram API Token"
+bot = Bot(token="token")
+dp = Dispatcher(bot)
 
-bot = telebot.TeleBot(TOKEN)
+@dp.message_handler(content_types=['new_chat_members','left_chat_member'])
+async def on_user_joined(message: types.Message):
+    await message.delete()
 
-@bot.message_handler(content_types=['new_chat_members'])
-def delete_join_message(m):
-    # Если бот не является администратором, то он не сможет удалить сообщение.
-    try:
-        bot.delete_message(m.chat.id,m.message_id)
-    except:
-        if m.new_chat_member.id != bot.get_me().id:
-            bot.send_message(m.chat.id,"Пожалуйста, сделайте меня администратором, чтобы я мог удалить присоединение и оставлять сообщения в этой группе!")
-        else:
-            bot.send_message(m.chat.id,"Привет! Я ваш верный бот "Имя вашего бота" Спасибо что добавили меня! Чтобы использовать меня, сделайте меня администратором, и я смогу удалить все надоедливые уведомления, когда участник присоединяется к группе или покидает ее!")
-        
-@bot.message_handler(content_types=['left_chat_member'])
-def delete_leave_message(m):
-    # Если бот удаляется, он не сможет удалить сообщение о выходе.
-    if m.left_chat_member.id != bot.get_me().id:
-        try:
-            bot.delete_message(m.chat.id,m.message_id)
-        except:
-            bot.send_message(m.chat.id,"Пожалуйста, сделайте меня администратором, чтобы я мог удалить присоединение и оставлять сообщения в этой группе!!")
-
-bot.polling()
+if __name__ == "__main__":
+    executor.start_polling(dp, skip_updates=False)
